@@ -1,65 +1,28 @@
-name: CI/CD Pipeline
-
+name: Copy Files to Remote Server
+ 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
-
+ 
 jobs:
-  build:
-    name: Build and Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Debug - List Files
-        run: ls -la
-
-      - name: Set Up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Tests
-        run: npm test
-
   deploy:
-    name: Deploy to AWS
-    needs: build
     runs-on: ubuntu-latest
-
+ 
+    env:
+      SERVER_IP: ${{ secrets.SERVER_IP }}
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+      TARGET_PATH: "/var/www/html/test2/"
+ 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AKIA2OAJTWTS3XHWUBEA }}
-          aws-secret-access-key: ${{ secrets.fGk5rJFTMv1KdabKdZbzDTS5Mavy7p27geLYXUuX }}
-          aws-region: ap-south-1
-
-      - name: Deploy to EC2
+ 
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+ 
+      - name: Copy Files to Remote Servera
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@your-ec2-instance-ip << 'EOF'
-            cd /var/www/app
-            git pull origin main
-            npm install
-            pm2 restart all
-          EOF
-
-  notify:
-    name: Notify Deployment Status
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Deployment Notification
-        run: echo "Deployment Completed Successfully!"
+          sshpass -p "$SERVER_PASSWORD" rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./ "$SERVER_USER@$SERVER_IP:$TARGET_PATH"
+          sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" "sudo systemctl restart apache2"
