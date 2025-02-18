@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push to main branch
+      - main
   pull_request:
     branches:
       - main
@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Debug - List Files
+        run: ls -la
 
       - name: Set Up Node.js
         uses: actions/setup-node@v3
@@ -30,7 +33,7 @@ jobs:
 
   deploy:
     name: Deploy to AWS
-    needs: build  # Run deployment only if build is successful
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
