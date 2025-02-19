@@ -19,10 +19,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Install sshpass
-        run: sudo apt-get update && sudo apt-get install -y sshpass
+      - name: Install sshpass and verify installation
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y sshpass
+          which sshpass  # This should print the path to sshpass
 
       - name: Test SSH Connection
+        shell: bash
         run: |
-         sshpass -p "your_server_password" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null your_server_user@your_server_ip "echo 'SSH connection successful'"
-          
+          sshpass -p "$SERVER_PASSWORD" ssh \
+            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            "$SERVER_USER@$SERVER_IP" "echo 'SSH connection successful'"
