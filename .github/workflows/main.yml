@@ -27,14 +27,3 @@ jobs:
           sshpass -p "$SERVER_PASSWORD" ssh \
             -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
             "$SERVER_USER@$SERVER_IP" "echo 'SSH connection successful'"
-
-      - name: Copy Files to Remote Server
-        run: |
-          sshpass -p "$SERVER_PASSWORD" rsync -avz \
-            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
-            --exclude '.git' \
-            ./ "$SERVER_USER@$SERVER_IP:$TARGET_PATH"
-
-          sshpass -p "$SERVER_PASSWORD" ssh \
-            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-            "$SERVER_USER@$SERVER_IP" "sudo systemctl restart apache2"
