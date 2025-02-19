@@ -25,4 +25,7 @@ jobs:
       - name: Copy Files to Remote Servera
         run: |
           sshpass -p "$SERVER_PASSWORD" rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./ "$SERVER_USER@$SERVER_IP:$TARGET_PATH"
-          sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" "sudo systemctl restart apache2"
+      
+      - name: Restart Nginx on Remote Server
+        run: |
+          sshpass -p "$SERVER_PASSWORD" ssh -t -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" "echo '$SERVER_PASSWORD' | sudo -S systemctl restart apache2"
