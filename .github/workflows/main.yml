@@ -1,33 +1,28 @@
 name: Copy Files to Remote Server
-
+ 
 on:
   push:
     branches:
       - main
-
+ 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+ 
     env:
       SERVER_IP: ${{ secrets.SERVER_IP }}
       SERVER_USER: ${{ secrets.SERVER_USER }}
       SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
       TARGET_PATH: "/var/www/html/test2/"
-
+ 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Install sshpass and verify installation
-        shell: bash
+ 
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+ 
+      - name: Copy Files to Remote Servera
         run: |
-          sudo apt-get update && sudo apt-get install -y sshpass
-          which sshpass  # This should print the path to sshpass
-
-      - name: Test SSH Connection
-        shell: bash
-        run: |
-          sshpass -p "$SERVER_PASSWORD" ssh \
-            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-            "$SERVER_USER@$SERVER_IP" "echo 'SSH connection successful'"
+          sshpass -p "$SERVER_PASSWORD" rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./ "$SERVER_USER@$SERVER_IP:$TARGET_PATH"
+          sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" "sudo systemctl restart nginx"
