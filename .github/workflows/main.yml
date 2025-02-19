@@ -24,6 +24,5 @@ jobs:
 
       - name: Test SSH Connection
         run: |
-          sshpass -p "$SERVER_PASSWORD" ssh \
-            -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-            "$SERVER_USER@$SERVER_IP" "echo 'SSH connection successful'"
+         sshpass -p "your_server_password" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null your_server_user@your_server_ip "echo 'SSH connection successful'"
+          
